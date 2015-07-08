@@ -97,7 +97,7 @@ def hiddenfunction(x, y):
 
 def buildhiddenset():
     rows=[]
-    for i in range(20):
+    for i in range(200):
         x = randint(0, 40)
         y = randint(0, 40)
         rows.append([x, y, hiddenfunction(x, y)])
@@ -109,3 +109,60 @@ def scorefunction(tree, s):
         v = tree.evaluate([data[0], data[1]])
         dif += abs(v - data[2])
     return dif
+
+# ====== GENOMIC PROGRAM ======
+def mutate(t, pc, probchange = 0.1):
+    if random() < probchange:
+        return makerandomtree(pc)
+    else:
+        result = deepcopy(t)
+        if hasattr(t, "children"):
+            result.children = [mutate(c, pc, probchange)
+                    for c in t.children]
+        return result
+
+def crossover(t1, t2, probswap = 0.7, top = 1):
+    if random() < probswap and not top:
+        return deepcopy(t2)
+    else:
+        result = deepcopy(t1)
+        if hasattr(t1, 'children') and hasattr(t2, 'children'):
+            result.children = [crossover(c, choice(t2.children),
+                probswap, 0) for c in t1.children]
+
+def evolve(pc, popsize, rankfunction, maxgen = 500, mutationrate = 0.1,
+        breedingrate = 0.4, pexp = 0.7, pnew = 0.05):
+    def selectindex():
+        return int(log(random())/log(pexp))
+
+    population = [makerandomtree(pc) for i in range(popsize)]
+    for i in range(maxgen):
+        scores = rankfunction(population)
+        print scores[0][0]
+        if scores[0][0] == 0:
+            break
+
+        newpop = [scores[0][1], scores[1][1]]
+
+        # create new generation
+        while len(newpop) < popsize:
+            if random() > pnew:
+                newpop.append(mutate(crossover(
+                    scores[selectindex()][1],
+                    scores[selectindex()][1],
+                    probswap = breedingrate),
+                    pc, probchange = mutationrate))
+            else:
+                newpop.append(makerandomtree(pc))
+
+        population = newpop
+    scores[0][1].display()
+    return scores[0][1]
+
+def getrankfunction(dataset):
+    def rankfunction(population):
+        scores = [(scorefunction(t, dataset), t) for t in population]
+        scores.sort()
+        return scores
+    return rankfunction
+

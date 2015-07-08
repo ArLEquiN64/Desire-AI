@@ -8,7 +8,6 @@ class Main:
 
 if __name__ == "__main__":
     main = Main()
-    random1 = gp.makerandomtree(2)
-    random1.display()
-    hiddenset = gp.buildhiddenset()
-    print gp.scorefunction(random1,hiddenset)
+    rf = gp.getrankfunction(gp.buildhiddenset())
+    gp.evolve(2, 500, rf, mutationrate = 0.2, breedingrate = 0.1,
+            pexp = 0.7, pnew = 0.1)
