@@ -51,7 +51,7 @@ class searchnet:
                     % (table, strength, rowid))
 
     def generatehiddennode(self, inputids, outputids):
-        if len(inputids) > 3:
+        if len(inputids) != 5:
             return None
         createkey = '_'.join(sorted([str(ii) for ii in inputids]))
         res = self.con.execute(
@@ -151,7 +151,7 @@ class searchnet:
         self.feedforward()
         targets = [0.0] * len(outputids)
         targets[outputids.index(selectedoutput)] = 1.0
-        error = self.backpropagate(targets)
+        error = self.backpropagate(targets, 0.8)
         self.updatedatabase()
 
     def updatedatabase(self):
